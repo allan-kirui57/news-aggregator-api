@@ -12,8 +12,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('news_sources', function (Blueprint $table) {
-            $table->id();
+             $table->id();
+            $table->string('name')->unique();
+            $table->string('api_key')->nullable();
+            $table->string('base_url');
+            $table->boolean('is_active')->default(true);
+            $table->timestamp('last_fetched_at')->nullable();
+            $table->integer('total_articles_fetched')->default(0);
+            $table->enum('source_type', ['news_api', 'guardian', 'nyt', 'bbc', 'open_news', 'news_cred'])->default('news_api');
             $table->timestamps();
+            $table->softDeletes();
+
+            $table->index(['is_active', 'last_fetched_at']);
+            $table->index('source_type');
         });
     }
 
