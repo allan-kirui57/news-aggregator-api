@@ -2,19 +2,25 @@
 
 namespace App\Services;
 
+use App\Contracts\NewsSourceInterface;
 use App\Models\NewsSource;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class NewsAPIService
+class NewsAPIService implements NewsSourceInterface
 {
+    protected ArticlesService $articlesService;
+    public function __construct()
+    {
+        $this->articlesService = new ArticlesService();
+    }
+
     /**
      * Fetch and persist articles from NewsAPI
      */
     public function fetchArticles(NewsSource $newsSource, array $params = []): Collection
     {
-        $articlesService = new ArticlesService();
         $defaultParams = [
             'language' => 'en',
             'sortBy' => 'publishedAt',
@@ -43,7 +49,7 @@ class NewsAPIService
             $saved = collect();
 
             foreach ($data['articles'] ?? [] as $article) {
-                if ($stored = $articlesService->storeArticle($article, $newsSource)) {
+                if ($stored = $this->articlesService->storeArticle($article, $newsSource)) {
                     $saved->push($stored);
                 }
             }
