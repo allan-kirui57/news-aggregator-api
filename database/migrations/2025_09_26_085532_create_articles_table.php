@@ -16,10 +16,10 @@ return new class extends Migration
             $table->string('title', 500);
             $table->longText('content')->nullable();
             $table->text('summary')->nullable();
-            $table->string('url', 1000)->unique();
+            $table->string('url', 255)->unique();
             $table->string('image_url', 1000)->nullable();
             $table->timestamp('published_at');
-            $table->foreignId('news_source_id')->constrained()->onDelete('cascade');
+            $table->foreignId('news_source_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('category_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignId('author_id')->nullable()->constrained()->onDelete('set null');
             $table->string('content_hash', 64)->unique(); // For deduplication

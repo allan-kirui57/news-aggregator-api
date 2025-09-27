@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('news_sources', function (Blueprint $table) {
              $table->id();
             $table->string('name')->unique();
+            $table->string('slug')->unique();
             $table->string('api_key')->nullable();
             $table->string('base_url');
             $table->boolean('is_active')->default(true);

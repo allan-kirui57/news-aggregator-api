@@ -12,6 +12,7 @@ class NewsSource extends Model
 
     protected $fillable = [
         'name',
+        'slug',
         'api_key',
         'base_url',
         'is_active',
