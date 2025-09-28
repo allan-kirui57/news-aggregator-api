@@ -29,13 +29,8 @@ class NewsSourceSeeder extends Seeder
                 'name' => 'New York Times',
                 'base_url' => 'https://api.nytimes.com/svc',
                 'source_type' => 'nyt',
-            ],
-            [
-                'name' => 'BBC News',
-                'base_url' => 'https://newsapi.org/v2',
-                'source_type' => 'bbc',
             ]
-        ];
+        ];{}
 
         foreach ($sources as $sourceData) {
             $baseSlug = Str::slug($sourceData['name']);
