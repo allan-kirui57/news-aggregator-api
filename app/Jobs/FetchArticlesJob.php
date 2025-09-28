@@ -39,7 +39,7 @@ class FetchArticlesJob
             }
 
             $articles = $service->fetchArticles($this->source, [
-                'q' => $this->category ?? 'general',
+                'q' => $this->category,
                 'limit' => $this->limit,
             ]);
 

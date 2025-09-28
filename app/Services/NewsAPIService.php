@@ -24,7 +24,7 @@ class NewsAPIService implements NewsSourceInterface
     public function fetchArticles(NewsSource $newsSource, array $params = []): Collection
     {
         $defaultParams = [
-            'limit' => $params['limit'] ?? 20,
+            'limit' => $params['limit'] ?? 50,
             'q' => $params['q'] ?? 'general',
             'language' => 'en',
             'sortBy' => 'publishedAt',

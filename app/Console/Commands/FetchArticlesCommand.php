@@ -31,10 +31,10 @@ class FetchArticlesCommand extends Command
         $category = $this->option('category');
         $limit = (int) $this->option('limit');
 
-        if($sourceName) {
+        if ($sourceName) {
             $source = NewsSource::where('name', $sourceName)->orWhere('source_type', $sourceName)->first();
 
-            if(!$source) {
+            if (!$source) {
                 $this->error("News source {$sourceName} not found!");
                 return 1;
             }
@@ -45,15 +45,14 @@ class FetchArticlesCommand extends Command
             $sources = NewsSource::where('is_active', true)->get();
         }
 
-        foreach($sources as $source) {
+        foreach ($sources as $source) {
             // Dispatch Job
 
             $this->info("Dispatching fetch job for: {$source->name}");
             FetchArticlesJob::dispatch($source, $category, $limit);
-//            dispatch(new FetchArticlesJob($source, $category, $limit));
         }
 
-        $this->info("Dispatched all jobs successfuly");
+        $this->info("Dispatched all jobs Successfully");
 
         return 0;
     }

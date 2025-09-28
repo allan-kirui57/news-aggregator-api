@@ -31,13 +31,14 @@ class GuardianAPIService implements NewsSourceInterface
             'page' => 1,
             'show-tags'   => 'contributor'
         ];
+        $baseUrl = $newsSource->base_url ?? env('GUARDIAN_BASE_URL');
 
         try {
             $response = Http::timeout(30)
                 ->withHeaders([
                     'User-Agent' => 'NewsAggregator/1.0',
                 ])
-                ->get($newsSource->base_url.'/search', array_merge($defaultParams, $params));
+                ->get($baseUrl.'/search', array_merge($defaultParams, $params));
 
             if ($response->failed()) {
                 throw new \Exception("Guardian API failed: ".$response->body());
