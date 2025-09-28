@@ -18,14 +18,12 @@ return new class extends Migration
             $table->text('summary')->nullable();
             $table->string('url', 255)->unique();
             $table->string('image_url', 1000)->nullable();
-            $table->timestamp('published_at');
-            $table->foreignId('news_source_id')->nullable()->constrained()->onDelete('cascade');
-            $table->foreignId('category_id')->nullable()->constrained()->onDelete('set null');
-            $table->foreignId('author_id')->nullable()->constrained()->onDelete('set null');
+            $table->timestamp('published_at')->nullable();
+            $table->foreignId('news_source_id')->nullable()->constrained('news_sources')->onDelete('cascade');
+            $table->foreignId('category_id')->nullable()->constrained('categories')->onDelete('set null');
+            $table->foreignId('author_id')->nullable()->constrained('authors')->onDelete('set null');
             $table->string('content_hash', 64)->unique(); // For deduplication
             $table->string('external_id')->nullable(); // ID from external API
-            $table->integer('view_count')->default(0);
-            $table->decimal('sentiment_score', 3, 2)->nullable(); // -1.00 to 1.00
             $table->boolean('is_featured')->default(false);
             $table->timestamps();
             $table->softDeletes();

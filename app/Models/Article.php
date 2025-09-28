@@ -22,18 +22,14 @@ class Article extends Model
         'author_id',
         'content_hash',
         'external_id',
-        'view_count',
-        'sentiment_score',
         'is_featured'
     ];
 
     protected $casts = [
         'published_at' => 'datetime',
         'is_featured' => 'boolean',
-        'sentiment_score' => 'float',
-        'view_count' => 'integer'
     ];
-    
+
     public function newsSource()
     {
         return $this->belongsTo(NewsSource::class);

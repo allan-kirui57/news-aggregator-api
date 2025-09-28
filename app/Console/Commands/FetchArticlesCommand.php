@@ -47,6 +47,7 @@ class FetchArticlesCommand extends Command
 
         foreach($sources as $source) {
             // Dispatch Job
+
             $this->info("Dispatching fetch job for: {$source->name}");
             FetchArticlesJob::dispatch($source, $category, $limit);
 //            dispatch(new FetchArticlesJob($source, $category, $limit));

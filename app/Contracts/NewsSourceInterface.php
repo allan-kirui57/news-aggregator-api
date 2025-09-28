@@ -9,4 +9,6 @@ interface NewsSourceInterface
 {
     public function fetchArticles(NewsSource $newsSource, array $params = []): Collection;
 
+    public function transformCollection(array $rawArticle, array $options = []): array;
+
 }
