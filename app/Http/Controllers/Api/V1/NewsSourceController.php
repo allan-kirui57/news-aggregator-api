@@ -29,4 +29,25 @@ class NewsSourceController extends Controller
                 ->paginate($request->integer('per_page', 20))
         );
     }
+
+    /**
+     * Update only api_key and base_url.
+     */
+    public function update(Request $request, NewsSource $newsSource)
+    {
+        $validated = $request->validate([
+            'base_url' => ['required', 'url', 'max:255'],
+            'api_key'  => ['required', 'string', 'max:255'],
+        ]);
+
+        $newsSource->update([
+            'base_url' => $validated['base_url'],
+            'api_key'  => $validated['api_key'] ?? null,
+        ]);
+
+        return response()->json([
+            'message' => 'News source updated successfully.',
+            'data'    => $newsSource->fresh(),
+        ]);
+    }
 }

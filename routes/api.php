@@ -11,6 +11,7 @@ Route::group([
     Route::get('/articles', [ArticleController::class, 'index']);
 
     Route::get('/news-sources', [NewsSourceController::class, 'index']);
+    Route::put('/news-sources/{newsSource}', [NewsSourceController::class, 'update']);
     Route::get('/authors',    [MetaController::class, 'authors']);
     Route::get('/categories', [MetaController::class, 'categories']);
 });

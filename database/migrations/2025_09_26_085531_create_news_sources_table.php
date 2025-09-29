@@ -16,11 +16,11 @@ return new class extends Migration
             $table->string('name')->unique();
             $table->string('slug')->unique();
             $table->string('api_key')->nullable();
-            $table->string('base_url');
+            $table->string('base_url')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamp('last_fetched_at')->nullable();
             $table->integer('total_articles_fetched')->default(0);
-            $table->enum('source_type', ['news_api', 'guardian', 'nyt', 'bbc', 'open_news', 'news_cred'])->default('news_api');
+            $table->enum('source_type', ['news_api', 'guardian', 'nyt'])->default('news_api');
             $table->timestamps();
             $table->softDeletes();
 

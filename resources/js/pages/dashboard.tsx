@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { Head } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
@@ -9,7 +9,9 @@ import {
     Calendar,
     Globe,
     ArrowUp,
+    Settings
 } from 'lucide-react';
+import UpdateSourceModal from '@/pages/components/update-source-modal';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -40,11 +42,22 @@ interface DashboardProps {
         id: number;
         name: string;
         type: string;
+        api_key: string;
+        base_url: string;
         articles_count: number;
         last_updated: string;
     }>;
 }
-
+interface NewsSource {
+    id: number;
+    name: string;
+    type: string;
+    base_url: string;
+    api_key: string | null;
+    articles_count: number;
+    last_updated: string;
+    is_active: boolean;
+}
 const StatCard = ({
                       title,
                       value,
@@ -61,10 +74,10 @@ const StatCard = ({
     changeType?: "positive" | "negative";
 }) => {
     const colorClasses = {
-        blue: 'bg-blue-500 text-blue-100',
-        green: 'bg-green-500 text-green-100',
-        yellow: 'bg-yellow-500 text-yellow-100',
-        purple: 'bg-purple-500 text-purple-100',
+        blue: "bg-blue-800 text-blue-100",
+        green: "bg-green-800 text-green-100",
+        yellow: "bg-yellow-800 text-yellow-100",
+        purple: "bg-purple-800 text-purple-100"
     };
 
     return (
@@ -75,7 +88,7 @@ const StatCard = ({
                     <p className="text-3xl font-bold text-gray-900 dark:text-white">{value}</p>
                     {change && (
                         <p className={`flex items-center text-sm ${
-                            changeType === 'positive' ? 'text-green-600' : 'text-red-600'
+                            changeType === 'positive' ? 'text-green-800' : 'text-red-800'
                         }`}>
                             <ArrowUp className="mr-1 h-4 w-4" />
                             {change}
@@ -98,6 +111,19 @@ const ChartCard = ({ title, children }: { title: string; children: React.ReactNo
 );
 
 export default function Dashboard({ stats, sourceStats }: DashboardProps) {
+    const [selectedSource, setSelectedSource] = useState<NewsSource | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const handleUpdateClick = (source: NewsSource) => {
+        console.log(source)
+        setSelectedSource(source);
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setSelectedSource(null);
+    };
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
@@ -148,6 +174,12 @@ export default function Dashboard({ stats, sourceStats }: DashboardProps) {
                                     Type
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">
+                                    Base URL
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">
+                                    API KEY
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">
                                     Articles
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">
@@ -167,15 +199,36 @@ export default function Dashboard({ stats, sourceStats }: DashboardProps) {
                                         </div>
                                     </td>
                                     <td className="whitespace-nowrap px-6 py-4">
-                      <span className="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800 dark:bg-green-800 dark:text-green-100">
-                        {source.type}
-                      </span>
+                                      <span className="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800 dark:bg-green-800 dark:text-green-100">
+                                        {source.type}
+                                      </span>
+                                    </td>
+                                    <td className="whitespace-nowrap px-6 py-4">
+                                      <span className="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800 dark:bg-green-800 dark:text-green-100">
+                                        {source.base_url}
+                                      </span>
+                                    </td>
+                                    <td className="whitespace-nowrap px-6 py-4">
+                                        <span className="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800 dark:bg-green-800 dark:text-green-100">
+                                            {source.api_key
+                                                ? `${source.api_key.slice(0, 3)}${'*'.repeat(Math.max(source.api_key.length - 6, 0))}${source.api_key.slice(-3)}`
+                                                : '—'}
+                                        </span>
                                     </td>
                                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-white">
                                         {source.articles_count.toLocaleString()}
                                     </td>
                                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                                         {source.last_updated}
+                                    </td>
+                                    <td className="whitespace-nowrap px-6 py-4">
+                                        <button
+                                            onClick={() => handleUpdateClick(source)}
+                                            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                        >
+                                            <Settings className="h-4 w-4" />
+                                            Update
+                                        </button>
                                     </td>
                                 </tr>
                             ))}
@@ -184,6 +237,12 @@ export default function Dashboard({ stats, sourceStats }: DashboardProps) {
                     </div>
                 </ChartCard>
             </div>
+            {/* Update Modal */}
+            <UpdateSourceModal
+                source={selectedSource}
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+            />
         </AppLayout>
     );
 }

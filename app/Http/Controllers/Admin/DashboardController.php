@@ -27,6 +27,8 @@ class DashboardController extends Controller
                     'id' => $source->id,
                     'name' => $source->name,
                     'type' => $source->source_type,
+                    'base_url' => $source->base_url,
+                    'api_key' => $source->api_key,
                     'articles_count' => $source->articles_count,
                     'last_updated' => $source->updated_at->diffForHumans()
                 ];
