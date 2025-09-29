@@ -2,16 +2,7 @@ import { useForm } from '@inertiajs/react';
 import { X, Key, Save} from 'lucide-react';
 import React from 'react';
 import axios from 'axios'
-interface NewsSource {
-    id: number;
-    name: string;
-    type: string;
-    base_url: string;
-    api_key: string | null;
-    articles_count: number;
-    last_updated: string;
-    is_active: boolean;
-}
+import { NewsSource } from '@/types';
 
 const UpdateSourceModal = ({
     source,
@@ -32,8 +23,8 @@ const UpdateSourceModal = ({
     React.useEffect(() => {
         if (source) {
             setData({
-                name: source.name,
-                base_url: source.base_url,
+                name: source.name ?? '',
+                base_url: source.base_url ?? '',
                 api_key: source.api_key || '',
                 is_active: source.is_active,
             });
@@ -48,6 +39,7 @@ const UpdateSourceModal = ({
             await axios.put(`/api/v1/news-sources/${source.id}`, {
                 base_url: data.base_url,
                 api_key: data.api_key,
+                is_active: data.is_active,
             });
 
             onClose();
@@ -83,7 +75,7 @@ const UpdateSourceModal = ({
                         </label>
                         <input
                             type="text"
-                            value={data.name}
+                            value={data.name ?? ''}
                             onChange={(e) => setData('name', e.target.value)}
                             className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                             required
@@ -102,7 +94,7 @@ const UpdateSourceModal = ({
                         </label>
                         <input
                             type="url"
-                            value={data.base_url}
+                            value={data.base_url ?? ''}
                             onChange={(e) =>
                                 setData('base_url', e.target.value)
                             }
@@ -125,7 +117,7 @@ const UpdateSourceModal = ({
                         </label>
                         <input
                             type="password"
-                            value={data.api_key}
+                            value={data.api_key ?? ''}
                             onChange={(e) => setData('api_key', e.target.value)}
                             placeholder="Enter API key (optional)"
                             className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"

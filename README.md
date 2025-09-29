@@ -16,14 +16,14 @@ Before you begin, ensure you have the following installed on your system:
 
 ### 1. Clone the Repository
 
-```bash
+```
 git clone https://github.com/allan-kirui57/news-aggregator-api.git
 cd news-aggregator-api
 ```
 
 ### 2. Install Dependencies
 
-```bash
+```
 composer install
 ```
 
@@ -31,13 +31,13 @@ composer install
 
 Copy the environment example file:
 
-```bash
+```
 cp .env.example .env
 ```
 
 ### 4. Generate Application Key
 
-```bash
+```
 php artisan key:generate
 ```
 
@@ -56,15 +56,21 @@ DB_PASSWORD=your_password
 
 ### 6. Run Migrations
 
-```bash
+```
 php artisan migrate
 ```
 
 ### 7. Seed the Database
 
-```bash
+```
 php artisan db:seed
 ```
+This will create default Admin and User accounts for immediate access
+
+| Role      | Email               | Password   |
+| --------- | ------------------- | ---------- |
+| **Admin** | `admin@example.com` | `password` |
+| **User**  | `johndoe@example.com`  | `password` |
 
 ## 🔑 API Keys Configuration
 
@@ -79,7 +85,7 @@ You need to create accounts and obtain API keys from the following news sources:
 | **New York Times** | [https://developer.nytimes.com/](https://developer.nytimes.com/) | [Docs](https://developer.nytimes.com/docs) |
 
 ### Environment Variables
-
+#### Option 1: Using `.env` file
 Add the following API configurations to your `.env` file:
 
 ```env
@@ -96,6 +102,14 @@ NYT_API_KEY=your_nyt_api_key_here
 NYT_API_URL=https://api.nytimes.com/svc
 NYT_API_SECRET=your_nyt_api_secret_here
 ```
+#### Manage Keys in the Dashboard
+The News Agg App also provides a convenient Admin Dashboard where API keys and base URLs can be updated without touching the code.
+1. Login as Admin: Use admin credentials to access the dashboard.
+2. Navigate to: Dashboard → News Sources.
+3. Edit Each Source
+- Update the API Key directly. 
+- Modify the Base URL if needed.
+- Save changes to apply them instantly.
 
 ## 🔧 Configuration Steps
 
@@ -126,13 +140,15 @@ php artisan serve
 ```
 
 The application will be available at `http://localhost:8000`
-
-### Queue Workers (for background jobs - API Fetching)
-
-```bash
+### Run the Scheduler
+The scheduler dispatches fetching articles job at the configured intervals(every minute):
+```
+php artisan schedule:work
+```
+### Run Queue Worker background job - API Article Fetching
+```
 php artisan queue:work
 ```
-
 ### Base URL
 ```
 http://localhost:8000/api/v1
@@ -142,7 +158,7 @@ http://localhost:8000/api/v1
 
 The application includes commands to fetch and sync data from news sources:
 
-```bash
+```
 # Fetch articles from all sources
 php artisan fetch:articles
 

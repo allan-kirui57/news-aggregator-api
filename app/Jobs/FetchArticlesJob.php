@@ -8,7 +8,7 @@ use App\Models\NewsSource;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
-class FetchArticlesJob
+class FetchArticlesJob implements ShouldQueue
 {
     use Queueable;
 

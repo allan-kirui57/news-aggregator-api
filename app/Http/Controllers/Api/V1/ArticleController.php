@@ -46,7 +46,7 @@ class ArticleController extends Controller
             $query->where('published_at', '<=', $request->to_date);
         }
 
-        $perPage = min($request->get('per_page', 100), 100); // Max 100 per page
+        $perPage = min($request->get('per_page', 20), 100); // Max 100 per page
         $articles = $query->paginate($perPage);
 
         return response()->json([

@@ -48,9 +48,9 @@ class PermissionSeeder extends Seeder
 
         // Create normal user
         $normalUser = User::firstOrCreate(
-            ['email' => 'user@example.com'],
+            ['email' => 'johndoe@example.com'],
             [
-                'name' => 'Normal User',
+                'name' => 'John Doe',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
             ]

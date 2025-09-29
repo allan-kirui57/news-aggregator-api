@@ -1,55 +1,44 @@
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
-import { dashboard, login, register } from '@/routes';
-import { SharedData } from '@/types';
+import ArticlesGrid from '@/pages/components/articles-grid';
+import Filters from '@/pages/components/filters';
+import { Article, Author, Category, NewsSource, SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
+import { dashboard, login, register } from '@/routes';
+import { User } from 'lucide-react';
 
 export default function ArticlesList() {
     const { auth } = usePage<SharedData>().props;
-    const [articles, setArticles] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [articles, setArticles] = useState<Article[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [sources, setSources] = useState<NewsSource[]>([]);
+    const [authors, setAuthors] = useState<Author[]>([]);
     const [filters, setFilters] = useState({
         search: '',
         category: '',
         source: '',
         author: '',
     });
+    const [loading, setLoading] = useState(false);
+    const [page, setPage] = useState(1);
+    const [lastPage, setLastPage] = useState(1);
 
-    const [categories, setCategories] = useState([]);
-    const [sources, setSources] = useState([]);
-    const [authors, setAuthors] = useState([]);
-
-    const fetchArticles = async () => {
+    const fetchArticles = async (p = 1) => {
         setLoading(true);
         try {
-            // Clean up filters to remove empty values
-            const cleanFilters = Object.entries(filters).reduce(
-                (acc, [key, value]) => {
-                    if (value && value !== '' && value !== 'all') {
-                        acc[key] = value;
-                    }
-                    return acc;
-                },
-                {},
+            const cleanFilters = Object.fromEntries(
+                Object.entries(filters).filter(([_, v]) => v && v !== 'all'),
             );
-
-            const queryParams = new URLSearchParams(cleanFilters);
-            const response = await fetch(`/api/v1/articles?${queryParams}`);
-            const data = await response.json();
+            const query = new URLSearchParams({
+                ...cleanFilters,
+                page: p.toString(),
+            });
+            const res = await fetch(`/api/v1/articles?${query}`);
+            const data = await res.json();
             setArticles(data.data || []);
-        } catch (error) {
-            console.error('Error fetching articles:', error);
+            setPage(data.meta?.current_page || p);
+            setLastPage(data.meta?.last_page || 1);
+        } catch (e) {
+            console.error(e);
             setArticles([]);
         } finally {
             setLoading(false);
@@ -59,15 +48,15 @@ export default function ArticlesList() {
     const fetchFilters = async () => {
         try {
             const [catRes, srcRes, authRes] = await Promise.all([
-                fetch('/api/v1/categories').then((res) => res.json()),
-                fetch('/api/v1/news-sources').then((res) => res.json()),
-                fetch('/api/v1/authors').then((res) => res.json()),
+                fetch('/api/v1/categories').then((r) => r.json()),
+                fetch('/api/v1/news-sources').then((r) => r.json()),
+                fetch('/api/v1/authors').then((r) => r.json()),
             ]);
-            setCategories(catRes.data || catRes || []);
-            setSources(srcRes.data || srcRes || []);
-            setAuthors(authRes.data || authRes || []);
-        } catch (error) {
-            console.error('Error fetching filters:', error);
+            setCategories(catRes.data || catRes);
+            setSources(srcRes.data || srcRes);
+            setAuthors(authRes.data || authRes);
+        } catch (err) {
+            console.error(err);
         }
     };
 
@@ -76,27 +65,14 @@ export default function ArticlesList() {
         fetchArticles();
     }, []);
 
-    const handleFilterChange = (key, value) =>
+    const handleFilterChange = (key: string, value: string) =>
         setFilters((prev) => ({ ...prev, [key]: value }));
 
-    const applyFilters = () => fetchArticles();
+    const applyFilters = () => fetchArticles(1);
 
     const resetFilters = () => {
-        setFilters({
-            search: '',
-            category: '',
-            source: '',
-            author: '',
-        });
-    };
-
-    const formatDate = (dateString) => {
-        if (!dateString) return '';
-        return new Date(dateString).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-        });
+        setFilters({ search: '', category: '', source: '', author: '' });
+        fetchArticles(1);
     };
 
     return (
@@ -113,12 +89,19 @@ export default function ArticlesList() {
 
                         <nav className="flex items-center gap-3">
                             {auth.user ? (
-                                <Link
-                                    href={dashboard()}
-                                    className="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC]"
-                                >
-                                    Dashboard
-                                </Link>
+                                auth.user.is_admin ? (
+                                    <Link
+                                        href={dashboard()}
+                                        className="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC]"
+                                    >
+                                        Dashboard
+                                    </Link>
+                                ) : (
+                                    <div className="flex items-center gap-2 rounded-sm border border-[#19140035] px-5 py-1.5 text-sm text-[#1b1b18] dark:border-[#3E3E3A] dark:text-[#EDEDEC]">
+                                        <User className="h-4 w-4" />
+                                        {auth.user.name}
+                                    </div>
+                                )
                             ) : (
                                 <>
                                     <Link
@@ -140,284 +123,24 @@ export default function ArticlesList() {
                 </div>
             </header>
 
-            {/* Main Content Container */}
             <div className="container mx-auto max-w-7xl px-4 py-8">
-                <div className="space-y-6">
-                    {/* 🔎 Filters */}
-                    <Card className="shadow-sm">
-                        <CardHeader className="pb-4">
-                            <CardTitle className="text-lg">
-                                Filter Articles
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-                                <Input
-                                    placeholder="Search articles..."
-                                    value={filters.search}
-                                    onChange={(e) =>
-                                        handleFilterChange(
-                                            'search',
-                                            e.target.value,
-                                        )
-                                    }
-                                    onKeyPress={(e) =>
-                                        e.key === 'Enter' && applyFilters()
-                                    }
-                                />
-
-                                <Select
-                                    value={filters.category || undefined}
-                                    onValueChange={(value) =>
-                                        handleFilterChange(
-                                            'category',
-                                            value || '',
-                                        )
-                                    }
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="All Categories" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">
-                                            All Categories
-                                        </SelectItem>
-                                        {categories.map((c) => (
-                                            <SelectItem
-                                                key={c.id}
-                                                value={
-                                                    c.slug || c.id.toString()
-                                                }
-                                            >
-                                                {c.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-
-                                <Select
-                                    value={filters.source || undefined}
-                                    onValueChange={(value) =>
-                                        handleFilterChange(
-                                            'source',
-                                            value || '',
-                                        )
-                                    }
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="All Sources" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">
-                                            All Sources
-                                        </SelectItem>
-                                        {sources.map((s) => (
-                                            <SelectItem
-                                                key={s.id}
-                                                value={
-                                                    s.slug ||
-                                                    s.name ||
-                                                    s.id.toString()
-                                                }
-                                            >
-                                                {s.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-
-                                <Select
-                                    value={filters.author || undefined}
-                                    onValueChange={(value) =>
-                                        handleFilterChange(
-                                            'author',
-                                            value || '',
-                                        )
-                                    }
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="All Authors" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">
-                                            All Authors
-                                        </SelectItem>
-                                        {authors.map((a) => (
-                                            <SelectItem
-                                                key={a.id}
-                                                value={
-                                                    a.slug ||
-                                                    a.name ||
-                                                    a.id.toString()
-                                                }
-                                            >
-                                                {a.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="flex gap-2">
-                                <Button
-                                    onClick={applyFilters}
-                                    disabled={loading}
-                                >
-                                    {loading ? 'Loading...' : 'Apply Filters'}
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    onClick={resetFilters}
-                                >
-                                    Reset
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* 📰 Articles */}
-                    {loading ? (
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                            {[...Array(8)].map((_, i) => (
-                                <Card key={i} className="rounded-xl shadow-sm">
-                                    <CardHeader className="p-3">
-                                        <Skeleton className="h-4 w-3/4" />
-                                        <Skeleton className="h-4 w-1/2" />
-                                    </CardHeader>
-                                    <Skeleton className="mx-3 h-28 w-full rounded" />
-                                    <CardContent className="space-y-2 p-3">
-                                        <Skeleton className="h-3 w-full" />
-                                        <Skeleton className="h-3 w-2/3" />
-                                        <div className="flex justify-between">
-                                            <Skeleton className="h-3 w-16" />
-                                            <Skeleton className="h-3 w-20" />
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-                    ) : (
-                        <>
-                            {articles.length > 0 ? (
-                                <>
-                                    <div className="flex items-center justify-between">
-                                        <p className="text-sm text-slate-600 dark:text-slate-400">
-                                            Found {articles.length} article
-                                            {articles.length !== 1 ? 's' : ''}
-                                        </p>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                                        {articles.map((article) => (
-                                            <Card
-                                                key={article.id}
-                                                className="overflow-hidden rounded-xl border-slate-200 shadow-sm transition-all duration-200 hover:shadow-md dark:border-slate-700"
-                                            >
-                                                {article.image_url && (
-                                                    <div className="relative">
-                                                        <img
-                                                            src={
-                                                                article.image_url
-                                                            }
-                                                            alt={article.title}
-                                                            className="h-32 w-full object-cover"
-                                                            onError={(e) => {
-                                                                e.target.style.display =
-                                                                    'none';
-                                                            }}
-                                                        />
-                                                        {article.is_featured && (
-                                                            <Badge className="absolute top-2 left-2 text-xs">
-                                                                Featured
-                                                            </Badge>
-                                                        )}
-                                                    </div>
-                                                )}
-
-                                                <CardHeader className="p-3">
-                                                    <CardTitle className="line-clamp-3 text-sm leading-tight font-semibold">
-                                                        <a
-                                                            href={article.url}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="transition-colors hover:text-blue-600"
-                                                        >
-                                                            {article.title}
-                                                        </a>
-                                                    </CardTitle>
-                                                </CardHeader>
-
-                                                <CardContent className="space-y-2 p-3 pt-0 text-xs text-slate-600 dark:text-slate-400">
-                                                    {article.summary && (
-                                                        <p className="line-clamp-3 text-slate-500 dark:text-slate-400">
-                                                            {article.summary}
-                                                        </p>
-                                                    )}
-
-                                                    <div className="mb-2 flex flex-wrap gap-1">
-                                                        {article.category
-                                                            ?.name && (
-                                                            <Badge
-                                                                variant="secondary"
-                                                                className="text-xs"
-                                                            >
-                                                                {
-                                                                    article
-                                                                        .category
-                                                                        .name
-                                                                }
-                                                            </Badge>
-                                                        )}
-                                                        {article.source
-                                                            ?.name && (
-                                                            <Badge
-                                                                variant="outline"
-                                                                className="text-xs"
-                                                            >
-                                                                {
-                                                                    article
-                                                                        .source
-                                                                        .name
-                                                                }
-                                                            </Badge>
-                                                        )}
-                                                    </div>
-
-                                                    <div className="flex items-center justify-between border-t border-slate-200 pt-2 text-[11px] text-slate-500 dark:border-slate-600 dark:text-slate-400">
-                                                        <span className="flex-1 truncate">
-                                                            {article.author
-                                                                ?.name ||
-                                                                'Unknown Author'}
-                                                        </span>
-                                                        {article.published_at && (
-                                                            <span className="ml-2 flex-shrink-0">
-                                                                {formatDate(
-                                                                    article.published_at,
-                                                                )}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
-                                        ))}
-                                    </div>
-                                </>
-                            ) : (
-                                <Card className="py-12 text-center shadow-sm">
-                                    <CardContent>
-                                        <p className="text-lg text-slate-500 dark:text-slate-400">
-                                            No articles found
-                                        </p>
-                                        <p className="mt-2 text-sm text-slate-400 dark:text-slate-500">
-                                            Try adjusting your search criteria
-                                            or reset filters
-                                        </p>
-                                    </CardContent>
-                                </Card>
-                            )}
-                        </>
-                    )}
-                </div>
+                <Filters
+                    filters={filters}
+                    categories={categories}
+                    sources={sources}
+                    authors={authors}
+                    loading={loading}
+                    onChange={handleFilterChange}
+                    onApply={applyFilters}
+                    onReset={resetFilters}
+                />
+                <ArticlesGrid
+                    articles={articles}
+                    loading={loading}
+                    currentPage={page}
+                    lastPage={lastPage}
+                    onPageChange={fetchArticles}
+                />
             </div>
         </div>
     );

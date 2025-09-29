@@ -38,11 +38,13 @@ class NewsSourceController extends Controller
         $validated = $request->validate([
             'base_url' => ['required', 'url', 'max:255'],
             'api_key'  => ['required', 'string', 'max:255'],
+            'is_active'  => ['required', 'boolean'],
         ]);
 
         $newsSource->update([
             'base_url' => $validated['base_url'],
             'api_key'  => $validated['api_key'] ?? null,
+            'is_active'  => $validated['is_active'] ?? null,
         ]);
 
         return response()->json([
