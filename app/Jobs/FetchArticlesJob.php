@@ -43,7 +43,16 @@ class FetchArticlesJob implements ShouldQueue
                 'limit' => $this->limit,
             ]);
 
-            $fetchJob->markAsCompleted($articles->count());
+            $fetchJob->markAsCompleted(
+                $articles->count(),
+                $articles->count(),
+                0
+            );
+            // Update news source stats
+            $this->source->update([
+                'last_fetched_at' => now(),
+                'total_articles_fetched' => $articles->count()
+            ]);
 
         } catch (\Illuminate\Http\Client\RequestException $e) {
             // Rate limit or network error - retry

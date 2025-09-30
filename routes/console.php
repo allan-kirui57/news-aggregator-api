@@ -12,5 +12,6 @@ Schedule::job(function () {
     NewsSource::active()->each(function ($source) use ($category, $limit) {
         FetchArticlesJob::dispatch($source, $category, $limit);
     });
+
 })->everySixHours();
 

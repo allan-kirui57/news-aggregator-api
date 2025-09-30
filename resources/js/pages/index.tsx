@@ -153,6 +153,9 @@ export default function ArticlesList() {
                     onReset={resetFilters}
                 />
 
+                {/*TODO - Add trending Articles*/}
+                {/*TODO - Add featured Articles*/}
+
                 <ArticlesGrid
                     articles={articles}
                     loading={loading}

@@ -167,6 +167,15 @@ php artisan fetch:articles --source=newsapi
 php artisan fetch:articles --source=guardian
 php artisan fetch:articles --source=nyt
 ```
+A scheduled job runs every six hours, dispatching the `FetchArticlesJob` for each active news source.  
+By default, it fetches up to **20 articles** from the **Technology** category per source.
+You can adjust this schedule in `app/Console/Kernel.php` to suit your needs (e.g., hourly, daily,  change the **Category** or **Limit** etc.).
+
+
+
+
+
+
 
 ## 📄 License
 

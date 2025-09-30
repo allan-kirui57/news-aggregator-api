@@ -55,7 +55,7 @@ export default function Filters({
                         <SelectContent>
                             <SelectItem value="all">All Categories</SelectItem>
                             {categories.map((c) => (
-                                <SelectItem key={c.id} value={c.slug || String(c.id)}>
+                                <SelectItem key={c.id} value={String(c.id)}>
                                     {c.name}
                                 </SelectItem>
                             ))}
@@ -72,7 +72,7 @@ export default function Filters({
                         <SelectContent>
                             <SelectItem value="all">All Sources</SelectItem>
                             {sources.map((s) => (
-                                <SelectItem key={s.id} value={s.slug || s.name || String(s.id)}>
+                                <SelectItem key={s.id} value={String(s.id)}>
                                     {s.name}
                                 </SelectItem>
                             ))}
@@ -89,7 +89,7 @@ export default function Filters({
                         <SelectContent>
                             <SelectItem value="all">All Authors</SelectItem>
                             {authors.map((a) => (
-                                <SelectItem key={a.id} value={a.slug || a.name || String(a.id)}>
+                                <SelectItem key={a.id} value={String(a.id)}>
                                     {a.name}
                                 </SelectItem>
                             ))}

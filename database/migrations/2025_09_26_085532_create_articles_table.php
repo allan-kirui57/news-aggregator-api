@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('title', 500);
             $table->longText('content')->nullable();
             $table->text('summary')->nullable();
-            $table->string('url', 255)->unique();
+            $table->string('url', 1000);
             $table->string('image_url', 1000)->nullable();
             $table->timestamp('published_at')->nullable();
             $table->foreignId('news_source_id')->nullable()->constrained('news_sources')->onDelete('cascade');
@@ -28,10 +28,10 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->string('external_id')->unique()->index();
             $table->index(['news_source_id', 'published_at']);
             $table->index('category_id');
             $table->index('author_id');
+            $table->index('external_id');
             $table->fullText(['title', 'content', 'summary']); // For search
         });
     }
