@@ -43,7 +43,13 @@ class FetchArticlesJob implements ShouldQueue
                 'limit' => $this->limit,
             ]);
 
+            $fetchJob->markAsCompleted($articles->count());
+
+        } catch (\Illuminate\Http\Client\RequestException $e) {
+            // Rate limit or network error - retry
+            $this->release(300); // Retry in 5 minutes
         } catch (\Exception $e) {
+
             $fetchJob->markAsFailed($e->getMessage());
             // Log the error
             \Log::error("FetchArticlesJob failed for {$this->source->name}: ".$e->getMessage());

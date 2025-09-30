@@ -1,10 +1,11 @@
 import ArticlesGrid from '@/pages/components/articles-grid';
 import Filters from '@/pages/components/filters';
-import { Article, Author, Category, NewsSource, SharedData } from '@/types';
-import { Link, usePage } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
 import { dashboard, login, register } from '@/routes';
-import { User } from 'lucide-react';
+import { Article, Author, Category, NewsSource, SharedData } from '@/types';
+import { Link, router, usePage } from '@inertiajs/react';
+import { LogOut, User } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { route } from 'ziggy-js';
 
 export default function ArticlesList() {
     const { auth } = usePage<SharedData>().props;
@@ -65,14 +66,22 @@ export default function ArticlesList() {
         fetchArticles();
     }, []);
 
-    const handleFilterChange = (key: string, value: string) =>
+    const handleFilterChange = (key: string, value: string) => {
+        console.log(key)
+        console.log(value)
         setFilters((prev) => ({ ...prev, [key]: value }));
+
+    }
 
     const applyFilters = () => fetchArticles(1);
 
     const resetFilters = () => {
         setFilters({ search: '', category: '', source: '', author: '' });
         fetchArticles(1);
+    };
+
+    const handleLogout = () => {
+        router.post(route('logout'));
     };
 
     return (
@@ -97,9 +106,18 @@ export default function ArticlesList() {
                                         Dashboard
                                     </Link>
                                 ) : (
-                                    <div className="flex items-center gap-2 rounded-sm border border-[#19140035] px-5 py-1.5 text-sm text-[#1b1b18] dark:border-[#3E3E3A] dark:text-[#EDEDEC]">
+                                    <div className="flex items-center gap-2 px-5 py-1.5 text-sm text-[#1b1b18] bg-gray-200 rounded-2xl">
                                         <User className="h-4 w-4" />
-                                        {auth.user.name}
+                                        <span>{auth.user.name}</span>
+                                        <button
+                                            onClick={() =>
+                                                handleLogout()
+                                            }
+                                            className="flex items-center gap-1 rounded-md border border-gray-300 px-2 py-1 text-xs hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
+                                        >
+                                            <LogOut className="h-3 w-3" />
+                                            Logout
+                                        </button>
                                     </div>
                                 )
                             ) : (
@@ -134,6 +152,7 @@ export default function ArticlesList() {
                     onApply={applyFilters}
                     onReset={resetFilters}
                 />
+
                 <ArticlesGrid
                     articles={articles}
                     loading={loading}

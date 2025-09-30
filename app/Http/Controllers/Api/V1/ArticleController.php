@@ -22,7 +22,7 @@ class ArticleController extends Controller
         // Apply filters
         if ($request->filled('source')) {
             $query->whereHas('newsSource', function ($q) use ($request) {
-                $q->where('name', $request->source);
+                $q->where('slug', $request->source);
             });
         }
 
@@ -34,7 +34,7 @@ class ArticleController extends Controller
 
         if ($request->filled('author')) {
             $query->whereHas('author', function ($q) use ($request) {
-                $q->where('name', 'like', '%'.$request->author.'%');
+                $q->where('slug', $request->author);
             });
         }
 

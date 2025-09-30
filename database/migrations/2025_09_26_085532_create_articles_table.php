@@ -27,6 +27,12 @@ return new class extends Migration
             $table->boolean('is_featured')->default(false);
             $table->timestamps();
             $table->softDeletes();
+
+            $table->string('external_id')->unique()->index();
+            $table->index(['news_source_id', 'published_at']);
+            $table->index('category_id');
+            $table->index('author_id');
+            $table->fullText(['title', 'content', 'summary']); // For search
         });
     }
 
